@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en" style="height: 100%">
+<head>
+    <meta charset="utf-8">
+    <title>ECharts</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0,viewport-fit=cover">
+    <meta content="telephone=no" name="format-detection"/>
+    <script src="echarts.min.js"></script>
+</head>
+<body style="height: 100%">
+<div id="main" style="height:300px"></div>
+<script type="text/javascript">
+    window.document.addEventListener('message', function (e) {//注册事件 接收数据
+        document.getElementById('main').style.height = window.innerHeight + 'px';
+        const message = e.data;//字符串类型
+        var yData = JSON.parse(message).yData;
+        var xData = JSON.parse(message).xData;
+        for (var p = 0; p < yData.length; p++) {
+            var item = yData[p];
+            item.type = 'line';
+            item.symbol = 'none';
+            item.smooth = true;
+            item.itemStyle = {
+                normal: {
+                    color: item.color
+                }
+            }
+        }
+
+        var chart = echarts.init(document.getElementById('main'));
+        // 指定图表的配置项和数据
+        var option = {
+            tooltip: {
+                trigger: 'axis',
+                formatter: function (params) {//重写鼠标移动事件
+                    var outs = [];
+                    var length = params.length;
+                    var i = 0;
+                    for (; i < length; i++) {
+                        var data = params[i];
+                        var out = {};
+                        out.name = data.seriesName;
+                        out.value = data.value;
+                        out.dataIndex = data.dataIndex;
+                        outs.push(out);
+                    }
+                    window.postMessage(JSON.stringify(outs));
+                },
+            },
+            calculable: true,
+            xAxis: [
+                {
+                    type: 'category',
+                    boundaryGap: false,
+                    axisLine: {
+                        lineStyle: {
+                            opacity: 0,
+                        }
+                    },
+                    data: xData,
+                    axisLabel: {
+                        interval: 0,
+                        textStyle: {
+                            fontSize: 14,
+                            color: '#48648C'
+                        }
+                    }
+                }
+            ],
+            yAxis: [
+                {
+                    type: 'value',
+                    // splitLine:{
+                    //     show:false
+                    // },
+                    axisLabel: {
+                        textStyle: {
+                            fontSize: 14,
+                            color: '#48648C'
+                        }
+                    },
+                    axisLine: {
+                        lineStyle: {
+                            opacity: 0,
+                        }
+                    },
+                }
+            ],
+            grid: {
+                left: "1%",
+                right: "9%",
+                containLabel: true
+            },
+            series: yData
+        };
+        // 使用刚指定的配置项和数据显示图表。
+        chart.setOption(option);
+    });
+</script>
+</body>
+</html>
